@@ -217,13 +217,42 @@ class BPMCalculator:
             tooltip_label.grid(row=row+1, column=col, padx=1, pady=(0, 2))
             
             self.note_buttons.append(btn)
+        
+        # === MODIFIERS ROW ===
+        # Add modifier buttons for dotted and triplet notes
+        self.modifier_buttons = []
+        self.modifier_var = tk.StringVar(value="Normal")  # Default to normal notes
+        
+        modifier_options = [
+            ("Normal", "Normal", "Standard note"),
+            ("Dotted", "Dotted", "Adds 50% duration"),
+            ("Triplet", "Triplet", "2/3 of normal duration")
+        ]
+        
+        # Create modifier buttons in row 2 (skipping row 1 which has tooltips)
+        for i, (symbol, value, tooltip) in enumerate(modifier_options):
+            row = 2  # Modifier buttons in row 2
+            col = i * 2  # Spread them out more
+            
+            btn = tk.Button(note_frame, text=symbol, 
+                           font=("Arial", 10), width=6, height=1,
+                           command=lambda v=value: self.select_modifier(v),
+                           relief="raised", bd=2)
+            btn.grid(row=row, column=col, padx=2, pady=(5, 2), sticky="ew")
+            
+            # Add tooltip text below modifier button
+            modifier_tooltip = ttk.Label(note_frame, text=tooltip, font=("Arial", 7))
+            modifier_tooltip.grid(row=row+1, column=col, padx=2, pady=(0, 2))
+            
+            self.modifier_buttons.append(btn)
             
         # Configure equal column weights for note frame (now 6 columns)
         for i in range(6):
             note_frame.columnconfigure(i, weight=1)
         
-        # Initially select quarter note button
+        # Initially select quarter note button and normal modifier
         self.update_button_selection()
+        self.update_modifier_selection()
         
         # Note value result (consistent with beat position calculator)
         ttk.Label(bpm_frame, text="Duration:").grid(row=2, column=0, sticky=tk.W, pady=(10, 5))
@@ -252,6 +281,25 @@ class BPMCalculator:
         self.update_button_selection()
         self.auto_calculate_all()  # Automatically calculate when note changes
         
+    def select_modifier(self, modifier_value):
+        """Select a modifier and update button appearance"""
+        self.modifier_var.set(modifier_value)
+        self.update_modifier_selection()
+        self.auto_calculate_all()  # Automatically calculate when modifier changes
+        
+    def update_modifier_selection(self):
+        """Update the visual appearance of modifier buttons to show selection"""
+        current_modifier = self.modifier_var.get()
+        modifier_values = ["Normal", "Dotted", "Triplet"]
+        
+        for i, btn in enumerate(self.modifier_buttons):
+            if i < len(modifier_values) and modifier_values[i] == current_modifier:
+                # Selected button - make it look pressed
+                btn.config(relief="sunken", bg="#4CAF50", fg="white")
+            else:
+                # Unselected button - normal appearance
+                btn.config(relief="raised", bg="SystemButtonFace", fg="black")
+        
     def update_button_selection(self):
         """Update the visual appearance of note buttons to show selection"""
         current_note = self.note_var.get()
@@ -273,7 +321,7 @@ class BPMCalculator:
                 btn.config(relief="raised", bg="SystemButtonFace", fg="black")
         
     def get_note_multiplier(self):
-        """Get the multiplier for the selected note value"""
+        """Get the multiplier for the selected note value and modifier"""
         note_multipliers = {
             "Whole Note (1/1)": 4.0,
             "Half Note (1/2)": 2.0,
@@ -282,7 +330,19 @@ class BPMCalculator:
             "Sixteenth Note (1/16)": 0.25,
             "Thirty-second Note (1/32)": 0.125
         }
-        return note_multipliers.get(self.note_var.get(), 1.0)
+        
+        base_multiplier = note_multipliers.get(self.note_var.get(), 1.0)
+        
+        # Apply modifier
+        modifier = self.modifier_var.get()
+        if modifier == "Dotted":
+            # Dotted notes are 1.5 times the base duration (adds 50%)
+            return base_multiplier * 1.5
+        elif modifier == "Triplet":
+            # Triplet notes are 2/3 of the base duration
+            return base_multiplier * (2.0/3.0)
+        else:  # Normal
+            return base_multiplier
         
     def calculate(self):
         """Calculate milliseconds from BPM"""

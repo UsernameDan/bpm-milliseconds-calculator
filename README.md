@@ -11,6 +11,7 @@ A comprehensive Python tkinter application that converts beats per minute (BPM) 
 - **Compact button layout** with all note values in a single row
 - **Fallback support** for systems without musical fonts
 - Support for all standard note values (semibreve, minim, crotchet, quaver, semiquaver, demisemiquaver)
+- **Rhythmic modifiers** for dotted notes and triplets
 - Calculate precise note durations in milliseconds
 - Clean, user-friendly interface with intuitive button selection using proper musical terminology
 - **Consistent visual styling** with blue text results in both calculators
@@ -82,7 +83,13 @@ For the best musical symbol display, install a dedicated music font:
    - ♪ = Eighth Note / Quaver
    - ♬ = Sixteenth Note / Semiquaver
    - ♫ = Thirty-second Note / Demisemiquaver
-2. **View Duration**: See the millisecond duration for the selected note value
+
+2. **Select Modifier**: Choose from rhythmic modifiers:
+   - **Normal**: Standard note duration
+   - **Dotted**: Adds 50% to the note duration (1.5x)
+   - **Triplet**: 2/3 of the normal duration (for triplet rhythms)
+
+3. **View Duration**: See the millisecond duration for the selected note value and modifier
 4. View the results:
    - Milliseconds: Duration of one note in milliseconds
    - Frequency: How many notes per second
@@ -92,6 +99,11 @@ For the best musical symbol display, install a dedicated music font:
 
 **Default startup values** (120 BPM with crotchets):
 - Note Duration: 500.00 ms
+
+**Modifier Examples** (120 BPM quarter note):
+- Normal: 500.00 ms
+- Dotted: 750.00 ms (500 × 1.5)
+- Triplet: 333.33 ms (500 × 2/3)
 
 **Time Signature Example** (4/4 time at 120 BPM):
 - Bar 1, Beat 1 = 0.00 ms (start of song)
